@@ -8,21 +8,26 @@ String input;
 int data[];
 
 void setup() { 
-  size(450, 255);
-  background(204);
-  stroke(0);
-  frameRate(10); // Slow it down a little
+  size(450, 450);
+  background(170,140,100);
+  frameRate(15); // Slow it down a little
+  
+  p0 = new Player();
+  p1 = new Player();
+  
+  p0.col = 0; 
+  p1.col = 255;
+  
+  
   s = new Server(this, 12345);  // Start a simple server on a port
 } 
+
 void draw() { 
   if (mousePressed == true) {
-    // Draw our line
-    stroke(255);
-    line(pmouseX, pmouseY, mouseX, mouseY); 
-    // Send mouse coords to other person
-    s.write(pmouseX + " " + pmouseY + " " + mouseX + " " + mouseY + "\n");
-    
-    fan(mouseX,mouseY);
+
+    p0.placeStone(mouseX, mouseY);
+   
+    s.write(mouseX + " " + mouseY + "\n");
   }
   
   // Receive data from client
@@ -31,8 +36,7 @@ void draw() {
     input = c.readString(); 
     input = input.substring(0, input.indexOf("\n"));  // Only up to the newline
     data = int(split(input, ' '));  // Split values into an array
-    // Draw line using received coords
-    stroke(0);
-    line(data[0], data[1], data[2], data[3]); 
+
+    p1.placeStone(data[0], data[1]);
   }
 }
