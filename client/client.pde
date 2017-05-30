@@ -7,7 +7,7 @@ int data[];
 
 
 void setup() { 
-  size(450, 450);
+  size(608, 608);
   background(170,140,100);
   frameRate(15); // Slow it down a little
   
@@ -19,6 +19,10 @@ void setup() {
   
   // Connect to the server’s IP address and port­
   c = new Client(this, "127.0.0.1", 12345); // Replace with your server’s IP and port
+  
+  board.init();
+  image(board.bg, 0, 0, 608, 608);
+  drawGrid(Board.span/2,Board.span/2);
 } 
 
 void draw() {         
