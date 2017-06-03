@@ -1,44 +1,51 @@
 import processing.net.*; 
 
-Client c; 
-String input;
-int data[]; 
-
-
+Client client;
 
 void setup() { 
   size(608, 608);
-  background(170,140,100);
-  frameRate(15); // Slow it down a little
+
+  // Connect to the server’s IP address and port­
+  client = new Client(this, "127.0.0.1", 12345); // Replace with your server’s IP and port
   
-  p0 = new Player();
-  p1 = new Player();
+  frameRate(15);
   
+  board.init(608);
   p0.col = 255; 
   p1.col = 0;
-  
-  // Connect to the server’s IP address and port­
-  c = new Client(this, "127.0.0.1", 12345); // Replace with your server’s IP and port
-  
-  board.init();
-  image(board.bg, 0, 0, 608, 608);
-  drawGrid(Board.span/2,Board.span/2);
 } 
 
-void draw() {         
-  if (mousePressed == true) {
-    
-     p0.placeStone(mouseX, mouseY);
-    
-    c.write(mouseX + " " + mouseY + "\n");
-  }
+void mouseClicked() {
+  
+  board.handleClick(mouseX,mouseY,p0);
+  client.write(mouseX + " " + mouseY + "\n");
+  
+}
 
+int[] getRemoteData() {
+  
+  int[] data = null;
+  
   // Receive data from server
-  if (c.available() > 0) { 
-    input = c.readString(); 
-    input = input.substring(0,input.indexOf("\n"));  // Only up to the newline
-    data = int(split(input, ' '));  // Split values into an array
+  if (client.available() > 0) { 
+    String input = client.readString(); 
+    if(input.indexOf("\n") >= 0)
+    {
+      input = input.substring(0,input.indexOf("\n"));  // Only up to the newline
+      data = int(split(input, ' '));  // Split values into an array
+    }
+  }
+  
+  return data;
+}
+
+void draw() {         
     
-    p1.placeStone(data[0], data[1]);
-  } 
+  int[] data = getRemoteData();
+  
+  if(data != null) {
+    board.handleClick(data[0], data[1],p1);
+  }
+  
+  board.draw();
 }

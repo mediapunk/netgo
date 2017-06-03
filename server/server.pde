@@ -2,52 +2,51 @@
 
 import processing.net.*;
 
-Server s; 
-Client c;
-String input;
-int data[];
-
-static final int N = Board.size * Board.spacing;
-
+Server server; 
 
 void setup() { 
-  
-  
   size(608, 608);
-  background(170,140,100);
-  frameRate(15); // Slow it down a little
+  server = new Server(this, 12345);  // Start the server
+  frameRate(15);
   
-  p0 = new Player();
-  p1 = new Player();
-  
+  board.init(608);
   p0.col = 0; 
   p1.col = 255;
-  
-  
-  s = new Server(this, 12345);  // Start a simple server on a port
-  
-  board.init();
-  image(board.bg, 0, 0, 608, 608);
-  
-  
-  drawGrid(Board.span/2,Board.span/2);
 } 
 
-void draw() { 
-  if (mousePressed == true) {
+void mouseClicked() {
+  
+  board.handleClick(mouseX,mouseY,p0);
+  server.write(mouseX + " " + mouseY + "\n");
+  
+}
 
-    p0.placeStone(mouseX, mouseY);
-   
-    s.write(mouseX + " " + mouseY + "\n");
-  }
+int[] getRemoteData() {
+  
+  int[] data = null;
   
   // Receive data from client
-  c = s.available();
-  if (c != null) {
-    input = c.readString(); 
-    input = input.substring(0, input.indexOf("\n"));  // Only up to the newline
-    data = int(split(input, ' '));  // Split values into an array
-
-    p1.placeStone(data[0], data[1]);
+  Client client = server.available();
+  
+  if (client != null) {
+    String input = client.readString();
+    if(input.indexOf("\n") >= 0)
+    {
+      input = input.substring(0,input.indexOf("\n"));  // Only up to the newline
+      data = int(split(input, ' '));  // Split values into an array
+    }
   }
+  
+  return data;
+}
+
+void draw() { 
+    
+  int[] data = getRemoteData();
+  
+  if(data != null) {
+    board.handleClick(data[0], data[1],p1);
+  }
+  
+  board.draw();
 }
