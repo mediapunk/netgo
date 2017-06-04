@@ -6,7 +6,7 @@
 
 ### How do I run server and client using localhost? ###
 
-* Download Processing 3
+* Download Processing 3 [https://processing.org/download/]
 * Open the server/server.pde project
 * Click Play
 * Open the client/client.pde project
