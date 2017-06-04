@@ -1,12 +1,13 @@
-// 2A: Shared drawing canvas (Server)
-
 import processing.net.*;
 
 Server server; 
+String clientip = "";
 
 void setup() { 
   size(608, 608);
+  
   server = new Server(this, 12345);  // Start the server
+  
   frameRate(15);
   
   board.init(608);
@@ -16,37 +17,40 @@ void setup() {
 
 void mouseClicked() {
   
-  board.handleClick(mouseX,mouseY,p0);
-  server.write(mouseX + " " + mouseY + "\n");
-  
+  board.handleClick(mouseX,mouseY,p0.col);
+  String msg = stringFromFloats(mouseX,mouseY,p0.col);
+  println(msg);
+  server.write( msg );
 }
 
-int[] getRemoteData() {
+void serverEvent(Server server, Client someClient) {
   
-  int[] data = null;
+  println("sending board state to " + someClient.ip());
   
-  // Receive data from client
-  Client client = server.available();
+  clientip = someClient.ip();
   
-  if (client != null) {
-    String input = client.readString();
-    if(input.indexOf("\n") >= 0)
+  // transmit game state:
+  for( Stone stone : board.stones )
+  {
+    if(stone != null)
     {
-      input = input.substring(0,input.indexOf("\n"));  // Only up to the newline
-      data = int(split(input, ' '));  // Split values into an array
+       String msg = stringFromFloats( stone.x, stone.y, stone.col );
+       println(msg.trim());
+       server.write( msg );
     }
-  }
-  
-  return data;
+  } 
+}
+
+void handleRemoteData() {
+  Client client = server.available();
+  board.handleClientData(client);  
 }
 
 void draw() { 
-    
-  int[] data = getRemoteData();
-  
-  if(data != null) {
-    board.handleClick(data[0], data[1],p1);
-  }
-  
+  handleRemoteData();
   board.draw();
+  
+  textSize(20);
+  fill(0, 102, 153, 51);
+  text("client: " + clientip, 20, 30);
 }

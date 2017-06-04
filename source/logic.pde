@@ -15,6 +15,14 @@ class Stone
     diameter = Board.spacing-2;
   }
   
+  Stone(float x_, float y_, int col_)
+  {
+    x = x_;
+    y = y_;
+    col = col_;
+    diameter = Board.spacing-2;
+  }
+  
   void draw()
   {
     int shadow = color(32,32,32,32);
@@ -34,7 +42,27 @@ class Stone
     float d2 = dx*dx+dy*dy;
     return (d2 < (diameter*diameter));
   }
+  
 }
+
+String stringFromFloats( float x, float y, float z )
+{
+   String msg = "";
+    msg += x + " ";
+    msg += y + " ";
+    msg += z + "\n";
+    return msg;
+}
+
+float[] floatsFromString( String input )
+{
+  float[] data = null;
+  input = input.trim();
+  data = float(split(input, ' '));  // Split values into an array
+  return data;
+}
+ 
+  
 
 class Player
 {
@@ -88,13 +116,13 @@ class Board
     } 
   }
   
-  void handleClick( float x, float y, Player p )
+  void handleClick( float x, float y, int col )
   {
     boolean removed = maybeRemoveStone(x,y);
     
     if(!removed)
     {
-      addStone(x,y,p.col); 
+      addStone(x,y,col); 
     }
   }
   
@@ -156,6 +184,28 @@ class Board
     }
     
   }
+  
+  void handleClientData(Client client) {
+    
+    if( client==null || client.available()<1 )
+      return;
+      
+    String alldata = client.readString();
+    String[] strings = split(alldata, '\n');
+    
+    for( String input : strings )
+    {
+      input = input.trim();
+      if(input.length() > 0)
+      {
+        float[] data = floatsFromString(input);
+        if( data != null && data.length>2 ) {
+          handleClick( data[0], data[1], int(data[2]) );
+        }
+      }
+    }
+  }
+  
 }
 
 

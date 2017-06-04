@@ -17,35 +17,27 @@ void setup() {
 
 void mouseClicked() {
   
-  board.handleClick(mouseX,mouseY,p0);
-  client.write(mouseX + " " + mouseY + "\n");
+  board.handleClick(mouseX,mouseY,p0.col);
+  String msg = stringFromFloats(mouseX,mouseY,p0.col);
+  println(msg);
+  client.write(msg);
   
 }
 
-int[] getRemoteData() {
   
-  int[] data = null;
-  
-  // Receive data from server
-  if (client.available() > 0) { 
-    String input = client.readString(); 
-    if(input.indexOf("\n") >= 0)
-    {
-      input = input.substring(0,input.indexOf("\n"));  // Only up to the newline
-      data = int(split(input, ' '));  // Split values into an array
-    }
-  }
-  
-  return data;
+void clientEvent(Client client) {
+  //println("clientEvent: " + client.available() + " bytes available");
+}
+
+void handleRemoteData() {
+  board.handleClientData(client);  
 }
 
 void draw() {         
-    
-  int[] data = getRemoteData();
-  
-  if(data != null) {
-    board.handleClick(data[0], data[1],p1);
-  }
-  
+  handleRemoteData();
   board.draw();
+  
+  textSize(20);
+  fill(0, 102, 153, 51);
+  text("host: " + client.ip(), 20, 30);
 }
