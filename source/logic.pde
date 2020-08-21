@@ -5,6 +5,7 @@ class Stone
   float x;
   float y;
   int col;
+  int fadedCol;
   float diameter;
   
   Stone()
@@ -12,6 +13,7 @@ class Stone
     x = 0;
     y = 0;
     col = 0;
+    fadedCol = 64;
     diameter = Board.spacing-2;
   }
   
@@ -23,16 +25,24 @@ class Stone
     diameter = Board.spacing-2;
   }
   
-  void draw()
+  void draw(float xoffset, float yoffset)
   {
+    float xpos = x+xoffset;
+    float ypos = y+yoffset;
+    
     int shadow = color(32,32,32,32);
     stroke(shadow);
     fill(shadow);
-    ellipse(x+2, y+2, diameter, diameter);
+    ellipse(xpos+2, ypos+2, diameter, diameter);
+    
+    int fcol = col;
+    if(xoffset != 0.0 || yoffset != 0.0) {
+      fcol = fadedCol;
+    }
     
     stroke(col);
-    fill(col);
-    ellipse(x, y, diameter, diameter); 
+    fill(fcol);
+    ellipse(xpos, ypos, diameter, diameter); 
   }
   
   boolean hitTest( float hitx, float hity ) {
@@ -40,7 +50,8 @@ class Stone
     float dx = abs(hitx-x);
     float dy = abs(hity-y);
     float d2 = dx*dx+dy*dy;
-    return (d2 < (diameter*diameter));
+    float dia = 0.7*diameter;
+    return (d2 < (dia*dia));
   }
   
 }
@@ -111,7 +122,8 @@ class Board
       stones[i].x = x;
       stones[i].y = y;
       stones[i].col = col;
-      stones[i].draw();
+      stones[i].fadedCol = 32 + ((3*col+255)/4); 
+      stones[i].draw(0.0,0.0);
       break;
     } 
   }
@@ -179,8 +191,21 @@ class Board
     
     for( Stone stone : stones )
     {
-       if(stone != null)
-         stone.draw();
+       if(stone != null) {
+         
+         // Main Stone
+         stone.draw(0,0);
+         
+         // Ghost stones
+         stone.draw(-Board.span,-Board.span);
+         stone.draw(-Board.span,0);
+         stone.draw(-Board.span,+Board.span);
+         stone.draw(0,-Board.span);
+         stone.draw(0, Board.span);
+         stone.draw( Board.span,-Board.span);
+         stone.draw( Board.span,0);
+         stone.draw( Board.span,+Board.span);
+       }
     }
     
   }
